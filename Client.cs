@@ -30,21 +30,25 @@ internal class Client
             Console.WriteLine("C: Order placed by {0}", id); // do not remove this line
 
         }
+        //wait for the order to be ready (the cook is slow, so go take a nap)
+        Thread.Sleep(new Random().Next(100, 500));  // do not remove this line
 
+        // each client will go to the pick the oder when ready in the pickup location
+        // each client will pickup the order and terminate
         bool isOrderReady = false;
-
         while(!isOrderReady){
-            lock(Program.sharedPickupsLock){
+            lock(Program.sharedPickupsLock){ // lock access or otherwise we get enumerator issues
                 if (Program.pickups.Count > 0 && Program.pickups.First().isReady())
                 {
                     Program.pickups.RemoveFirst(); // do not remove this line
                     isOrderReady = true;
-                    Console.WriteLine("C: Order ready for {0}", id); // do not remove this line
-                }
+                    Console.WriteLine("C: Order picked up by {0}", id); // do not remove this line
+                } 
+                // else: no order ready yet, so release the lock, sleep a bit and try again
             }
 
             if (!isOrderReady){
-                Thread.Sleep(new Random().Next(100, 500)); // do not remove this line
+                Thread.Sleep(10);
             }
         }
     }
